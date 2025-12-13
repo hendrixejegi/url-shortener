@@ -10,19 +10,19 @@ app.use(express.json());
 /**
  *
  * @param {string} url
- * @return {{id:string; originalURL: string; shortenedURL: string}}
+ * @return {{id:string; originalURL: string; shortURL: string}}
  */
 function createLink(url) {
   return {
     id: randomUUID(),
     originalURL: url,
-    shortenedURL: generateString(5),
+    shortURL: generateString(5),
   };
 }
 
 /**
  *
- * @param {{id:string; originalURL: string; shortenedURL: string}} data
+ * @param {{id:string; originalURL: string; shortURL: string}} data
  */
 async function addLink(data) {
   const contents = await readDB();
@@ -34,6 +34,7 @@ app.get('/', (req, res) => {
   res.send('Hello world');
 });
 
+// Route for shortening URLs
 app.post('/shorten', async (req, res) => {
   const { url } = req.body;
 
@@ -46,6 +47,30 @@ app.post('/shorten', async (req, res) => {
   } catch (error) {
     res.status(500).json({ msg: 'Internal server error' });
   }
+});
+
+// Route for redirect
+app.get('/:code', async (req, res) => {
+  const { code } = req.params;
+  console.log(code);
+
+  try {
+    const { db } = await readDB();
+
+    const link = db.find((item) => item.shortURL === code);
+
+    if (!link) {
+      res.status(404).json({ msg: 'Short URL code not found' });
+    } else {
+      res.status(302).redirect(link.originalURL);
+    }
+  } catch (error) {
+    res.status(500).json({ msg: 'Internal server error' });
+  }
+
+  console.log(db);
+
+  res.send('you will be redirected');
 });
 
 app.all('/*splat', (req, res) => {
