@@ -1,8 +1,24 @@
 require('dotenv').config();
 const express = require('express');
 const { randomUUID } = require('node:crypto');
+const { readDB, writeDB, generateString } = require('./lib/utils');
 
 const app = express();
+
+app.use(express.json());
+
+/**
+ *
+ * @param {string} url
+ * @return {{id:string; originalURL: string; shortenedURL: string}}
+ */
+function createLink(url) {
+  return {
+    id: randomUUID(),
+    originalURL: url,
+    shortenedURL: generateString(5),
+  };
+}
 
 /**
  *
@@ -14,14 +30,26 @@ async function addLink(data) {
   await writeDB(contents);
 }
 
-// addLink({
-//   id: randomUUID(),
-//   originalURL: 'https://google.com',
-//   shortenedURL: generateURL(5),
-// });
-
 app.get('/', (req, res) => {
   res.send('Hello world');
+});
+
+app.post('/shorten', async (req, res) => {
+  const { url } = req.body;
+
+  if (!url) res.status(400).json({ msg: 'Missing required field: url' });
+
+  try {
+    const newLink = createLink(url);
+    await addLink(newLink);
+    res.status(201).json({ msg: 'Link created', data: newLink });
+  } catch (error) {
+    res.status(500).json({ msg: 'Internal server error' });
+  }
+});
+
+app.all('/*splat', (req, res) => {
+  res.status(404).send('Not found');
 });
 
 const port = process.env.PORT;
