@@ -2,9 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const { randomUUID } = require('node:crypto');
 const { readDB, writeDB, generateString } = require('./lib/utils');
+const { resolve } = require('node:path');
 
 const app = express();
 
+// Middlewares
+app.use(express.static(resolve('./public')));
 app.use(express.json());
 
 /**
@@ -29,10 +32,6 @@ async function addLink(data) {
   contents.db.push(data);
   await writeDB(contents);
 }
-
-app.get('/', (req, res) => {
-  res.send('Hello world');
-});
 
 // Route for shortening URLs
 app.post('/shorten', async (req, res) => {
@@ -73,16 +72,13 @@ app.get('/:code', async (req, res) => {
   res.send('you will be redirected');
 });
 
+// Catch all route
 app.all('/*splat', (req, res) => {
   res.status(404).send('Not found');
 });
 
 const port = process.env.PORT;
 
-const start = async () => {
-  app.listen(port, () => {
-    console.log(`server is listening at ${port}...`);
-  });
-};
-
-start();
+app.listen(port, () => {
+  console.log(`server is listening at ${port}...`);
+});

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Google Sans', sans-serif;
+      }
+
+      main {
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      form {
+        margin-bottom: 1rem;
+      }
+
+      form + div > p {
+        margin-bottom: 0.5rem;
+      }
+
+      input,
+      button {
+        font: inherit;
+        padding: 10px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <form>
+          <label for="url">Enter your link*:</label>
+          <input type="url" name="url" id="url" required />
+          <button id="submit-btn" type="submit">Submit</button>
+        </form>
+        <div>
+          <p id="message"></p>
+          <a href="" id="short-url"></a>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      const form = document.querySelector('form');
+      const msgElem = document.getElementById('message');
+      const linkElem = document.getElementById('short-url');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const data = Object.fromEntries(new FormData(form));
+        const result = await createShortURL(data);
+
+        msgElem.innerText = result.msg;
+
+        if ('data' in result) {
+          const shortURL = window.origin.concat(`/${result.data.shortURL}`);
+          linkElem.href = shortURL;
+          linkElem.innerText = shortURL;
+        }
+      });
+
+      async function createShortURL(reqBody) {
+        try {
+          const { data } = await axios.post('/shorten', reqBody);
+          return data;
+        } catch (error) {
+          return error.response.data;
+        }
+      }
+    </script>
+  </body>
+</html>
