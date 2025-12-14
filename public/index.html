@@ -33,6 +33,20 @@
         margin-bottom: 1rem;
       }
 
+      form > div {
+        display: flex;
+        flex-direction: column;
+      }
+
+      form > *:not(:last-child) {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
       form + div > p {
         margin-bottom: 0.5rem;
       }
@@ -48,8 +62,14 @@
     <main>
       <div>
         <form>
-          <label for="url">Enter your link*:</label>
-          <input type="url" name="url" id="url" required />
+          <div>
+            <label for="url">Enter your link*:</label>
+            <input type="url" name="url" id="url" required />
+          </div>
+          <div>
+            <label for="custom">Custom URL:</label>
+            <input type="text" name="custom" id="custom" />
+          </div>
           <button id="submit-btn" type="submit">Submit</button>
         </form>
         <div>
@@ -78,6 +98,9 @@
           const shortURL = window.origin.concat(`/${result.data.shortURL}`);
           linkElem.href = shortURL;
           linkElem.innerText = shortURL;
+        } else {
+          linkElem.href = '';
+          linkElem.innerText = '';
         }
       });
 

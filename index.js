@@ -13,14 +13,24 @@ app.use(express.json());
 
 // Route for shortening URLs
 app.post('/shorten', async (req, res) => {
-  const { url } = req.body;
+  const { url, custom } = req.body;
 
   if (!url) res.status(400).json({ msg: 'Missing required field: url' });
 
   try {
+    if (custom) {
+      const isExisting = await URL.findOne({ shortURL: custom });
+
+      if (isExisting) {
+        return res
+          .status(400)
+          .json({ msg: 'Custom url exists. Try another one' });
+      }
+    }
+
     const newLink = await URL.create({
       originalURL: url,
-      shortURL: generateString(5),
+      shortURL: custom || generateString(5),
     });
 
     res.status(201).json({ msg: 'Link created', data: newLink });
