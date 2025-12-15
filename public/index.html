@@ -95,7 +95,9 @@
         msgElem.innerText = result.msg;
 
         if ('data' in result) {
-          const shortURL = window.origin.concat(`/${result.data.shortURL}`);
+          const shortURL = window.origin.concat(
+            `/api/v1/url/${result.data.shortURL}`
+          );
           linkElem.href = shortURL;
           linkElem.innerText = shortURL;
         } else {
@@ -106,7 +108,7 @@
 
       async function createShortURL(reqBody) {
         try {
-          const { data } = await axios.post('/shorten', reqBody);
+          const { data } = await axios.post('/api/v1/url/shorten', reqBody);
           return data;
         } catch (error) {
           return error.response.data;
